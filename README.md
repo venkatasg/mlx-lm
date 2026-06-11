@@ -44,6 +44,17 @@ mlx_lm.chat
 This will give you a chat REPL that you can use to interact with the LLM. The
 chat context is preserved during the lifetime of the REPL.
 
+To chat in the browser instead, start the HTTP server and open it in a browser:
+
+```bash
+mlx_lm.server --model <model>
+# then visit http://localhost:8080
+```
+
+The server comes with a built-in web UI as well as an OpenAI-compatible API.
+See the [server docs](https://github.com/ml-explore/mlx-lm/blob/main/mlx_lm/SERVER.md)
+for more.
+
 Commands in `mlx-lm` typically take command line options which let you specify
 the model, sampling parameters, and more. Use `-h` to see a list of available
 options for a command, e.g.:

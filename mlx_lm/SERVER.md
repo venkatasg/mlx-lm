@@ -30,6 +30,23 @@ To see a full list of options run:
 mlx_lm.server --help
 ```
 
+### Web UI
+
+The server ships with a simple chat web interface. Once the server is running,
+open the server address in a browser (for the example above,
+[http://localhost:8080](http://localhost:8080)) to start chatting. The UI
+supports streaming responses, switching between locally available models,
+markdown and code rendering, collapsible reasoning blocks, adjustable sampling
+parameters, and locally stored conversation history.
+
+To disable serving the web UI, start the server with `--no-web-ui`.
+
+The UI is a pre-built static bundle, so no extra dependencies are required. The
+source lives in the [`webui/`](https://github.com/ml-explore/mlx-lm/tree/main/webui)
+directory; see its `README.md` for development and build instructions.
+
+### API
+
 You can make a request to the model by running:
 
 ```shell

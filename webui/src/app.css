@@ -1,0 +1,167 @@
+:root {
+	--surface-0: #ffffff;
+	--surface-1: #f7f8fa;
+	--surface-2: #ffffff;
+	--surface-3: #eceef2;
+	--surface-4: #e2e5ea;
+	--border: #dfe2e8;
+	--text-1: #15181d;
+	--text-2: #3b3f47;
+	--text-3: #7b818c;
+	--accent: #3b6cff;
+	--accent-contrast: #ffffff;
+	--danger: #e5484d;
+	color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+	--surface-0: #0b0d12;
+	--surface-1: #11141a;
+	--surface-2: #161a22;
+	--surface-3: #1e232c;
+	--surface-4: #2a303b;
+	--border: #262b34;
+	--text-1: #eef1f6;
+	--text-2: #c2c7d0;
+	--text-3: #828a98;
+	--accent: #6f97ff;
+	--accent-contrast: #0b0d12;
+	--danger: #ff6168;
+	color-scheme: dark;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	margin: 0;
+	height: 100%;
+}
+
+body {
+	font-family:
+		-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+	background: var(--surface-0);
+	color: var(--text-1);
+	-webkit-font-smoothing: antialiased;
+}
+
+/* Markdown content */
+.markdown {
+	line-height: 1.6;
+	word-break: break-word;
+}
+.markdown > :first-child {
+	margin-top: 0;
+}
+.markdown > :last-child {
+	margin-bottom: 0;
+}
+.markdown p {
+	margin: 0.5rem 0;
+}
+.markdown a {
+	color: var(--accent);
+}
+.markdown ul,
+.markdown ol {
+	padding-left: 1.4rem;
+}
+.markdown :not(pre) > code {
+	background: var(--surface-3);
+	padding: 0.12rem 0.35rem;
+	border-radius: 0.3rem;
+	font-size: 0.88em;
+}
+.markdown blockquote {
+	border-left: 3px solid var(--border);
+	margin: 0.6rem 0;
+	padding-left: 0.9rem;
+	color: var(--text-3);
+}
+.markdown table {
+	border-collapse: collapse;
+	width: 100%;
+	margin: 0.6rem 0;
+}
+.markdown th,
+.markdown td {
+	border: 1px solid var(--border);
+	padding: 0.4rem 0.6rem;
+	text-align: left;
+}
+
+.code-block {
+	margin: 0.7rem 0;
+	border: 1px solid var(--border);
+	border-radius: 0.6rem;
+	overflow: hidden;
+	background: var(--surface-1);
+}
+.code-head {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 0.3rem 0.7rem;
+	font-size: 0.72rem;
+	color: var(--text-3);
+	border-bottom: 1px solid var(--border);
+	text-transform: lowercase;
+}
+.copy-btn {
+	background: none;
+	border: none;
+	color: var(--text-3);
+	cursor: pointer;
+	font-size: 0.72rem;
+}
+.copy-btn:hover {
+	color: var(--text-1);
+}
+.code-block pre {
+	margin: 0;
+	padding: 0.8rem 0.9rem;
+	overflow-x: auto;
+}
+.code-block code {
+	font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+	font-size: 0.84rem;
+	background: none;
+}
+
+/* Minimal highlight.js theme keyed to CSS variables. */
+.hljs {
+	color: var(--text-1);
+	background: transparent;
+}
+.hljs-comment,
+.hljs-quote {
+	color: var(--text-3);
+	font-style: italic;
+}
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-built_in,
+.hljs-meta {
+	color: #c678dd;
+}
+.hljs-string,
+.hljs-attr,
+.hljs-template-tag {
+	color: #98c379;
+}
+.hljs-number,
+.hljs-literal {
+	color: #d19a66;
+}
+.hljs-title,
+.hljs-section,
+.hljs-function .hljs-title {
+	color: #61afef;
+}
+.hljs-name,
+.hljs-type {
+	color: #e5c07b;
+}

@@ -40,6 +40,9 @@ setup(
         "mlx_lm.tool_parsers",
         "mlx_lm.chat_templates",
     ],
+    # Ship the pre-built web UI bundle served by `mlx_lm.server`.
+    package_data={"mlx_lm": ["webui/**/*"]},
+    include_package_data=True,
     python_requires=">=3.8",
     extras_require={
         "test": ["datasets", "lm-eval"],

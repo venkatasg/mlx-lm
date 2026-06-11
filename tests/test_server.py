@@ -1,6 +1,7 @@
 # Copyright © 2024 Apple Inc.
 
 import http
+import http.client
 import io
 import json
 import threading
@@ -12,6 +13,7 @@ import requests
 
 from mlx_lm.models.cache import KVCache
 from mlx_lm.server import (
+    WEB_UI_DIR,
     APIHandler,
     LRUPromptCache,
     Response,
@@ -55,6 +57,7 @@ class DummyModelProvider:
                 "prompt_cache_bytes": 1 << 63,
                 "prompt_cache_total_bytes": None,
                 "allowed_origins": ["*"],
+                "no_web_ui": False,
             },
         )
 
@@ -319,6 +322,34 @@ class TestServer(unittest.TestCase):
         self.assertIn("id", model)
         self.assertEqual(model["object"], "model")
         self.assertIn("created", model)
+
+    @unittest.skipUnless(WEB_UI_DIR.is_dir(), "web UI bundle not built")
+    def test_web_ui_serves_index(self):
+        response = requests.get(f"http://localhost:{self.port}/")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("text/html", response.headers["Content-type"])
+        self.assertIn("<!doctype html>", response.text.lower())
+
+    @unittest.skipUnless(WEB_UI_DIR.is_dir(), "web UI bundle not built")
+    def test_web_ui_spa_fallback(self):
+        # An unknown extension-less route falls back to the SPA entry point.
+        response = requests.get(f"http://localhost:{self.port}/some/app/route")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("text/html", response.headers["Content-type"])
+
+    @unittest.skipUnless(WEB_UI_DIR.is_dir(), "web UI bundle not built")
+    def test_web_ui_missing_asset_is_404(self):
+        response = requests.get(f"http://localhost:{self.port}/nope.js")
+        self.assertEqual(response.status_code, 404)
+
+    @unittest.skipUnless(WEB_UI_DIR.is_dir(), "web UI bundle not built")
+    def test_web_ui_blocks_path_traversal(self):
+        # Raw socket request so the traversal is not normalized by the client.
+        conn = http.client.HTTPConnection("localhost", self.port)
+        conn.request("GET", "/../../setup.py")
+        status = conn.getresponse().status
+        conn.close()
+        self.assertEqual(status, 404)
 
 
 class TestServerWithDraftModel(unittest.TestCase):
