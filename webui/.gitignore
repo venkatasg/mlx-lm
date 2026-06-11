@@ -1,0 +1,7 @@
+node_modules
+.svelte-kit
+.DS_Store
+
+# The repo root .gitignore ignores `lib/` (a Python build artifact); the Svelte
+# source lives in src/lib and must be tracked.
+!src/lib/

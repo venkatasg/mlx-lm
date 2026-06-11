@@ -3,6 +3,7 @@
 import argparse
 import json
 import logging
+import mimetypes
 import pickle
 import platform
 import socket
@@ -44,6 +45,9 @@ from .models.cache import (
 )
 from .sample_utils import make_logits_processors, make_sampler
 from .utils import _parse_size, load, sharded_load
+
+# Directory holding the pre-built web UI bundle (see ``webui/`` for the source).
+WEB_UI_DIR = Path(__file__).parent / "webui"
 
 
 def get_system_fingerprint():
@@ -1625,10 +1629,66 @@ class APIHandler(BaseHTTPRequestHandler):
             self.handle_models_request()
         elif self.path == "/health":
             self.handle_health_check()
+        elif not self.response_generator.cli_args.no_web_ui and self.handle_web_ui():
+            pass
         else:
             self._set_completion_headers(404)
             self.end_headers()
             self.wfile.write(b"Not Found")
+
+    def handle_web_ui(self) -> bool:
+        """
+        Serve the bundled web UI for GET requests that are not API calls.
+
+        Returns ``True`` if the request was handled (a file was served or the
+        single-page-app fallback returned), ``False`` otherwise so the caller
+        can emit a 404.
+        """
+        if not WEB_UI_DIR.is_dir():
+            return False
+
+        # Strip the query string and normalize the request path.
+        url_path = self.path.split("?", 1)[0]
+        rel_path = url_path.lstrip("/")
+        if rel_path in ("", "/"):
+            rel_path = "index.html"
+
+        # Resolve within the web UI directory and guard against path traversal.
+        target = (WEB_UI_DIR / rel_path).resolve()
+        try:
+            target.relative_to(WEB_UI_DIR.resolve())
+        except ValueError:
+            return False
+
+        # Fall back to the SPA entry point for unknown (non-asset) routes.
+        if not target.is_file():
+            if "." in Path(rel_path).name:
+                return False
+            target = WEB_UI_DIR / "index.html"
+            if not target.is_file():
+                return False
+
+        try:
+            data = target.read_bytes()
+        except OSError:
+            return False
+
+        content_type = (
+            mimetypes.guess_type(str(target))[0] or "application/octet-stream"
+        )
+        self.send_response(200)
+        self.send_header("Content-type", content_type)
+        self.send_header("Content-Length", str(len(data)))
+        # Immutable hashed assets can be cached aggressively; HTML cannot.
+        if "/immutable/" in url_path:
+            self.send_header("Cache-Control", "public, max-age=31536000, immutable")
+        else:
+            self.send_header("Cache-Control", "no-cache")
+        self._set_cors_headers()
+        self.end_headers()
+        self.wfile.write(data)
+        self.wfile.flush()
+        return True
 
     def handle_health_check(self):
         """
@@ -1883,6 +1943,11 @@ def main():
         "--pipeline",
         action="store_true",
         help="Use pipelining instead of tensor parallelism",
+    )
+    parser.add_argument(
+        "--no-web-ui",
+        action="store_true",
+        help="Disable serving the bundled web UI at the server root",
     )
     args = parser.parse_args()
     if mx.metal.is_available():
